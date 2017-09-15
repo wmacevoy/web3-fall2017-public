@@ -37,9 +37,7 @@ docker run -d --name "${THIS_NAME}-PhpMyAdmin" \
        -p 8888:80 \
        phpmyadmin/phpmyadmin
 
-       -e "PMA_HOST=${MARIA_DB_IP}" \
 PHP_MY_ADMIN_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${THIS_NAME}-PhpMyAdmin)
 
-open "https://${PHP_MY_ADMIN_IP}"
 
 

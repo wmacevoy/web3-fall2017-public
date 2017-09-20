@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# http://www.ostricher.com/2014/10/the-right-way-to-get-the-directory-of-a-bash-script/
+
+get_script_dir () {
+     SOURCE="${BASH_SOURCE[0]}"
+     while [ -h "$SOURCE" ]; do
+          DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+          SOURCE="$( readlink "$SOURCE" )"
+          [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+     done
+     $( cd -P "$( dirname "$SOURCE" )" )
+     pwd
+}
+
+THIS_DIR=$(get_script_dir)
+THIS_NAME="web3"
+
+. "$THIS_DIR/config"
+
+
+docker run -d --name "${THIS_NAME}-MariaDB" -p 3306:3306 -v "${THIS_DIR}/db":/var/lib/mysql \
+       -e "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" \
+       -e "MYSQL_USER=${MYSQL_USER}" \
+       -e "MYSQL_PASSWORD=${MYSQL_PASSWORD}" \
+       -e "MYSQL_DATABASE=${MYSQL_DATABASE}" mariadb
+
+MARIA_DB_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${THIS_NAME}-MariaDB)
+
+docker run -d --name "${THIS_NAME}-PhpApache" --link "${THIS_NAME}-MariaDB:mysql" -p 8080:80 -v "${THIS_DIR}":/var/www/html php:apache
+
+
+docker run -d --name "${THIS_NAME}-PhpMyAdmin" \
+       --link "${THIS_NAME}-MariaDB:db" \
+       -e "PMA_USER=root" \
+       -e "PMA_PASSWORD=${MYSQL_ROOT_PASSWORD}" \
+       -p 8888:80 \
+       phpmyadmin/phpmyadmin
+
+PHP_MY_ADMIN_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${THIS_NAME}-PhpMyAdmin)
+
+
+

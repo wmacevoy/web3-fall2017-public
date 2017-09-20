@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# http://www.ostricher.com/2014/10/the-right-way-to-get-the-directory-of-a-bash-script/
+
+get_script_dir () {
+     SOURCE="${BASH_SOURCE[0]}"
+     while [ -h "$SOURCE" ]; do
+          DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+          SOURCE="$( readlink "$SOURCE" )"
+          [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+     done
+     $( cd -P "$( dirname "$SOURCE" )" )
+     pwd
+}
+
+THIS_DIR=$(get_script_dir)
+THIS_NAME="web3"
+
+. "$THIS_DIR/config"
+
+docker stop "${THIS_NAME}-MysqlDB"
+docker rm "${THIS_NAME}-MysqlDB"
+docker stop "${THIS_NAME}-PhpApache"
+docker rm "${THIS_NAME}-PhpApache"
+docker stop "${THIS_NAME}-PhpMyAdmin"
+docker rm "${THIS_NAME}-PhpMyAdmin"

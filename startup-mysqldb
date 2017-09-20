@@ -27,8 +27,14 @@ docker run -d --name "${THIS_NAME}-MysqlDB" -p 3306:3306 -v "${THIS_DIR}/db":/va
 
 MYSQL_DB_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${THIS_NAME}-MysqlDB)
 
-docker run -d --name "${THIS_NAME}-PhpApache" --link "${THIS_NAME}-MysqlDB:mysql" -p 8080:80 -v "${THIS_DIR}":/var/www/html php:apache
+docker run -d --name "${THIS_NAME}-PhpApache" \
+       --link "${THIS_NAME}-MysqlDB:mysql" \
+       -p 8080:80 \
+       -v "${THIS_DIR}":/var/www/html \
+       php:apache
 
+docker exec "${THIS_NAME}-PhpApache" docker-php-ext-install pdo pdo_mysql
+docker restart "${THIS_NAME}-PhpApache"
 
 docker run -d --name "${THIS_NAME}-PhpMyAdmin" \
        --link "${THIS_NAME}-MysqlDB:db" \

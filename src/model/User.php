@@ -59,16 +59,18 @@ class User {
     }
     
     function authenticate($user,$pass) {
-        if (strcmp($user,"alice") == 0) {
-            if (strcmp($pass,"pass") === 0) {
-                return true;
-            }
-        }
-        if (strcmp($user,"bob") == 0) {
-            if (strcmp($pass,"pop") === 0) {
-                return true;
-            }
-        }
+        global $db;
+
+        $sql = 'SELECT id, username, password
+                FROM user
+                WHERE username = :username';
+		
+        $prepared = $db->prepare($sql, array($db->ATTR_CURSOR => $db->CURSOR_FWDONLY));
+        $prepared->execute(array(':username' => $user));
+        $result = $prepared->fetchAll();
+
+        var_dump($result);
+
         return false;
     }
     

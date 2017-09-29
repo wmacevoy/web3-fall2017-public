@@ -17,6 +17,12 @@ class TopMenu extends Text {
     public $items = array("Home" => "index.php", "Page One" => "one.php");
     function __construct() {
         parent::__construct();
+        global $user;
+        if ($user->authenticated()) {
+            $this->items["Logout"] = "logout.php";
+        } else {
+            $this->items["Login"] = "login.php";
+        }
     }
     function generate() {
         echo "<nav id=\"top_menu\">\n";

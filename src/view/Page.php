@@ -16,7 +16,10 @@ namespace view;
 class Page extends Text {
     function __construct() {
         parent::__construct();
-        array_push($this->parts, new TopMenu());
+        $this->add(new TopMenu());
+    }
+    function add($item) {
+        array_push($this->parts,$item);
     }
     function generate() {
         $this->doctype();

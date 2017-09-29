@@ -61,25 +61,43 @@ class User {
     function authenticate($user,$pass) {
         global $db;
 
-        $sql = 'SELECT id, username, password
+        $sql = "SELECT id, username, password
                 FROM user
-                WHERE username = :username';
+                WHERE username = :username";
 		
         $prepared = $db->prepare($sql, array($db->ATTR_CURSOR => $db->CURSOR_FWDONLY));
         $prepared->execute(array(':username' => $user));
         $result = $prepared->fetchAll();
 
-        var_dump($result);
-
-        return false;
+        return (count($result) == 1 && strcmp($result[0]['password'],$pass) == 0);
     }
     
     function authenticated() {
         return isset($_SESSION["user"]);
     }
     
+    function name() {
+        if ($this->authenticated()) {
+            return $_SESSION["user"]["username"];
+        } else {
+            return "anonymous";
+        }
+    }
+    
     function login($user) {
-        $_SESSION["user"]=$user;
+        global $db;
+
+        $sql = "SELECT id, username, password
+                FROM user
+                WHERE username = :username";
+		
+        $prepared = $db->prepare($sql, array($db->ATTR_CURSOR => $db->CURSOR_FWDONLY));
+        $prepared->execute(array(':username' => $user));
+        $result = $prepared->fetchAll();
+
+        $_SESSION["user"]=array("user" => $user,
+                                "username" => $result[0]['username'],
+                                "id" => $result[0]['id']);
     }
     
     function logout() {

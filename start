@@ -18,9 +18,6 @@ THIS_NAME="web3"
 
 . "$THIS_DIR/config"
 
-docker stop "${THIS_NAME}-MysqlDB"
-docker rm "${THIS_NAME}-MysqlDB"
-docker stop "${THIS_NAME}-PhpApache"
-docker rm "${THIS_NAME}-PhpApache"
-docker stop "${THIS_NAME}-PhpMyAdmin"
-docker rm "${THIS_NAME}-PhpMyAdmin"
+docker start "${THIS_NAME}-MysqlDB"
+docker start "${THIS_NAME}-PhpApache"
+docker start "${THIS_NAME}-PhpMyAdmin"

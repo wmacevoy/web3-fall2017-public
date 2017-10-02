@@ -18,6 +18,13 @@ THIS_NAME="web3"
 
 . "$THIS_DIR/config"
 
+docker stop "${THIS_NAME}-MysqlDB"
+docker rm "${THIS_NAME}-MysqlDB"
+docker stop "${THIS_NAME}-PhpApache"
+docker rm "${THIS_NAME}-PhpApache"
+docker stop "${THIS_NAME}-PhpMyAdmin"
+docker rm "${THIS_NAME}-PhpMyAdmin"
+
 
 docker run -d --name "${THIS_NAME}-MysqlDB" -p 3306:3306 -v "${THIS_DIR}/db":/var/lib/mysql \
        -e "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" \

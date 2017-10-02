@@ -103,6 +103,54 @@ class User {
     function logout() {
         unset($_SESSION["user"]);
     }
+
+    function exists($user) {
+        global $db;
+
+        $sql = "SELECT id
+                FROM user
+                WHERE username = :username";
+		
+        $prepared = $db->prepare($sql, array($db->ATTR_CURSOR => $db->CURSOR_FWDONLY));
+        $prepared->execute(array(':username' => $user));
+        $result = $prepared->fetchAll();
+
+        return count($result) == 1;
+    }
+
+    function passwordOk($password) {
+        //        return (strlen($password) >= 4);
+        $ok = true;
+        if (strlen($password) < 4) {
+            $ok = false;
+        }
+        if (!preg_match('/[A-Z]/',$password)) {
+            $ok = false;
+        }
+        if (!preg_match('/[a-z]/',$password)) {
+            $ok = false;
+        }
+        if (!preg_match('/[0-9]/',$password)) {
+            $ok = false;
+        }
+        if (!preg_match('/[^A-Za-z0-9].*[^A-Za-z0-9]/',$password)) {
+            $ok = false;
+        }
+
+        return $ok;
+    }
+
+    function register($username, $password) {
+        global $db;
+
+        $sql = "INSERT INTO user (username, password)
+                VALUES (:username, :password)";
+		
+        $prepared = $db->prepare($sql, array($db->ATTR_CURSOR => $db->CURSOR_FWDONLY));
+        $status = $prepared->execute(array(':username' => $username, ':password' => $password));
+
+        var_dump($status);
+    }
     
     function __construct() {
         

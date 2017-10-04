@@ -140,6 +140,24 @@ class User {
         return $ok;
     }
 
+    function nonce() {
+        $bytes = 16;
+        $fd = fopen("/dev/urandom","rb");
+        $data = fread($fd,$bytes);
+        fclose($fd);
+        return bin2hex($data);
+    }
+
+    function hash($username, $password, $nonce) {
+        $ans = "";
+        $count = 500000;
+        for ($i=0; $i<$count; ++$i) {
+            $message = "$ans/$username/$password/$nonce";
+            $ans=hash("sha256",$message);
+        }
+        return $ans;
+    }
+
     function register($username, $password) {
         global $db;
 

@@ -61,7 +61,7 @@ class User {
     function authenticate($user,$pass) {
         global $db;
 
-        $sql = "SELECT id, username, password
+        $sql = "SELECT id, username, password, hash, nonce
                 FROM user
                 WHERE username = :username";
 		
@@ -69,7 +69,43 @@ class User {
         $prepared->execute(array(':username' => $user));
         $result = $prepared->fetchAll();
 
-        return (count($result) == 1 && strcmp($result[0]['password'],$pass) == 0);
+        if (count($result) != 1) return false;
+
+        if (strlen($result[0]['password']) != 0) {
+            $this->setPassword($result[0]['id'],
+                               $result[0]['password']);
+            return strcmp($result[0]['password'],$pass) == 0;                  
+        }
+        $nonce=$result[0]['nonce'];
+        $hash=$this->hash($user,$pass,$nonce);
+        return strcmp($hash,$result[0]['hash']) == 0;
+    }
+
+    function setPassword($id, $password) {
+        global $db;
+
+        $sql = "SELECT username
+                FROM user
+                WHERE id = :id";
+		
+        $prepared = $db->prepare($sql, array($db->ATTR_CURSOR => $db->CURSOR_FWDONLY));
+        $prepared->execute(array(':id' => $id));
+        $result = $prepared->fetchAll();
+
+        if (count($result) != 1) return;
+
+        $user = $result[0]["username"];
+        $nonce = $this->nonce();
+        $hash = $this->hash($user,$password,$nonce);
+
+        $sql = "UPDATE user 
+                SET password=:password, hash=:hash, nonce=:nonce
+                WHERE id = :id";
+
+        $prepared = $db->prepare($sql, array($db->ATTR_CURSOR => $db->CURSOR_FWDONLY));
+        $prepared->execute(array(':id' => $id,
+                                 ':password'=>"", ':hash'=>$hash, ':nonce'=>$nonce));
+
     }
     
     function authenticated() {
@@ -87,7 +123,7 @@ class User {
     function login($user) {
         global $db;
 
-        $sql = "SELECT id, username, password
+        $sql = "SELECT id, username
                 FROM user
                 WHERE username = :username";
 		
@@ -161,13 +197,18 @@ class User {
     function register($username, $password) {
         global $db;
 
-        $sql = "INSERT INTO user (username, password)
-                VALUES (:username, :password)";
+        $nonce = $this->nonce();
+        $hash = $this->hash($username,$password,$nonce);
+
+        $sql = "INSERT INTO user (username, password, hash, nonce)
+                VALUES (:username, :password, :hash, :nonce)";
 		
         $prepared = $db->prepare($sql, array($db->ATTR_CURSOR => $db->CURSOR_FWDONLY));
-        $status = $prepared->execute(array(':username' => $username, ':password' => $password));
-
-        var_dump($status);
+        $status = $prepared->execute(array(
+            ':username' => $username, 
+            ':password' => "", 
+            ':hash' => $hash, 
+            ':nonce' => $nonce));
     }
     
     function __construct() {

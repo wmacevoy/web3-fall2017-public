@@ -37,10 +37,16 @@ MYSQL_DB_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress
 docker run -d --name "${THIS_NAME}-PhpApache" \
        --link "${THIS_NAME}-MysqlDB:mysql" \
        -p 8080:80 \
+       -p 8443:443 \
        -v "${THIS_DIR}":/var/www/html \
        php:apache
 
 docker exec "${THIS_NAME}-PhpApache" docker-php-ext-install pdo pdo_mysql
+docker exec "${THIS_NAME}-PhpApache" a2enmod ssl
+docker cp certs/apache-selfsigned.crt web3-PhpApache:/etc/ssl/certs/apache-selfsigned.crt
+docker cp certs/apache-selfsigned.key web3-PhpApache:/etc/ssl/private/apache-selfsigned.key
+docker cp apache2/sites-available/default-ssl.conf web3-PhpApache:/etc/apache2/sites-available/default-ssl.conf
+docker exec "${THIS_NAME}-PhpApache" a2ensite default-ssl
 docker restart "${THIS_NAME}-PhpApache"
 
 docker run -d --name "${THIS_NAME}-PhpMyAdmin" \
@@ -51,6 +57,3 @@ docker run -d --name "${THIS_NAME}-PhpMyAdmin" \
        phpmyadmin/phpmyadmin
 
 PHP_MY_ADMIN_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${THIS_NAME}-PhpMyAdmin)
-
-
-

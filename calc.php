@@ -12,7 +12,7 @@ class Calc extends view\Page {
         echo "<head>\n";
         echo '<script src="https://code.jquery.com/jquery-3.2.1.min.js"
                       integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-                      crossorigin="anonymous\"></script>';
+                      crossorigin="anonymous"></script>';
         echo '<script src="calc.js"></script>';
         $this->title();
         echo "</head>\n";
@@ -26,7 +26,7 @@ class Calc extends view\Page {
     
     function form() {
         $html = <<<END
-<form method="POST" action="login.php">
+<form>
   <input type="text" id="x" name="x" placeholder="x"  value="" />
 +
   <input type="text" id="y" name="y" placeholder="y"  value="" />

@@ -133,7 +133,8 @@ class User {
 
         $_SESSION["user"]=array("user" => $user,
                                 "username" => $result[0]['username'],
-                                "id" => $result[0]['id']);
+                                "id" => $result[0]['id'],
+                                "secret" => $this->nonce());
     }
     
     function logout() {
